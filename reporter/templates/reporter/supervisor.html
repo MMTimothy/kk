@@ -1,0 +1,212 @@
+{% extends 'reporter/base.html' %}
+{% load static %}
+{% load leaflet_tags %}
+{%block leaflet%}{% leaflet_js%}
+{%leaflet_css%}
+{% endblock %}
+
+
+{% block body %}
+
+<div id="select">
+    <br><br>
+    <p align="center">
+        <button type="button" class="btn btn-success btn-lg" id="btn_checkins"><span class="glyphicon glyphicon-hand-right">Check Ins</span> </button>
+        &nbsp;&nbsp;&nbsp;
+        <button type="button" class="btn btn-warning btn-lg" id="btn_checkouts"><span class="glyphicon glyphicon-hand-left">Check Outs</span> </button>
+        &nbsp;&nbsp;&nbsp;
+        <button type="button" class="btn btn-info btn-lg" id="btn_guards" data-toggle="modal" data-target="#div_individual"><span class="glyphicon glyphicon-user">&nbsp;Individual </span> </button>
+    </p>
+
+</div>
+<script>
+    $(document).ready(function(){
+        $("#checkouts").hide();
+        $("#checkins").hide();
+        $("#btn_checkins").click(function(){
+             $("#checkouts").fadeOut(1000);
+             $("#div_individuals").fadeOut(1000);
+            $("#checkins").fadeIn(5000);
+
+
+        });
+        $("#btn_checkouts").click(function(){
+            $("#checkins").fadeOut(1000);
+            $("#div_individuals").fadeOut(1000);
+            $("#checkouts").fadeIn(3000);
+
+        });
+
+    });
+
+</script>
+<div id="checkins">
+
+    <div class="table-responsive">
+        <table class="table table-responsive table-striped table-bordered table-hover">
+            <th class="success"  colspan="6"><h3 align="center"><span >CHECK INS</span></h3></th>
+            <tbody>
+            <th>
+                Guard ID
+            </th>
+            <th>
+                Guard Name
+            </th>
+            <th>
+                Time Cheked In
+            </th>
+            <th>
+                Longitude
+            </th>
+            <th>
+                Latitude
+            </th>
+            {% for worker in workers_in %}
+                <tr>
+                    <td>
+                        {{worker.user_id}}
+                    </td>
+                    <td>
+                        {%for user in users %}
+                            {% if user.id == worker.user_id %}
+                        <span class="glyphicon glyphicon-user"> &nbsp; {{user.username}}</span>
+                            {% else %}
+
+                            {%endif%}
+                        {%endfor%}
+                    </td>
+                    <td>
+                        {{worker.time}}
+                    </td>
+                    <td>
+                        {{worker.longitude}}
+                    </td>
+                    <td>
+                        {{worker.latitude}}
+                    </td>
+                    <td>
+                        <form action="{% url 'reporter:guardmap' %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="longitude" value="{{worker.longitude}}">
+                            <input type="hidden" name="latitude" value="{{worker.latitude}}">
+                            <button type="submit" class="btn btn-info btn-sm" onclick="showLocation('{{worker.longitude}}','{{worker.latitude}}')"><span class="glyphicon glyphicon-globe"> View</span> </button>
+                        </form>
+                    </td>
+
+                </tr>
+            {%endfor%}
+            </tbody>
+        </table>
+    </div>
+
+    <style>
+        #checkins,#checkouts
+        {
+            color:black;
+            background:#DCDCDC;
+        }
+    </style>
+
+
+</div>
+
+<div id="checkouts">
+    <div class="table-responsive">
+        <table class="table table-responsive table-striped table-bordered table-hover">
+            <th class="success"  colspan="6"><h3 align="center"><span >CHECK OUTS</span></h3></th>
+            <tbody>
+            <th>
+                Guard ID
+            </th>
+            <th>
+                Guard Name
+            </th>
+            <th>
+                Time Cheked In
+            </th>
+            <th>
+                Longitude
+            </th>
+            <th>
+                Latitude
+            </th>
+            {% for worker in checkouts %}
+                <tr>
+                    <td>
+                        {{worker.user_id}}
+                    </td>
+                    <td>
+                        {%for user in users %}
+                            {% if user.id == worker.user_id %}
+                        <span class="glyphicon glyphicon-user"> &nbsp; {{user.username}}</span>
+                            {% else %}
+
+                            {%endif%}
+                        {%endfor%}
+                    </td>
+                    <td>
+                        {{worker.time}}
+                    </td>
+                    <td>
+                        {{worker.longitude}}
+                    </td>
+                    <td>
+                        {{worker.latitude}}
+                    </td>
+                    <td>
+                        <form action="{% url 'reporter:guardmap' %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="longitude" value="{{worker.longitude}}">
+                            <input type="hidden" name="latitude" value="{{worker.latitude}}">
+                            <button type="submit" class="btn btn-info btn-sm" onclick="showLocation('{{worker.longitude}}','{{worker.latitude}}')"><span class="glyphicon glyphicon-globe"> View</span> </button>
+                        </form>
+                    </td>
+
+                </tr>
+            {%endfor%}
+            </tbody>
+        </table>
+    </div>
+
+    <style>
+        #checkins
+        {
+            color:black;
+            background:#DCDCDC;
+        }
+    </style>
+
+
+</div>
+
+<div id="div_individual" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="close" data-dismiss="modal">&times;</button>
+                <h3 align="center"><label class="label label-success">Individual Detail</label> </h3>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal" method="post" action="">
+                    {%csrf_token%}
+                    <div class="form-group">
+                        <label class="label label-info control-label col-sm-2" for="guard_id">Gurad ID</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="guard_id" name="guard_id">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <button type="submit" class="btn btn-success">View</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+
+{% endblock %}

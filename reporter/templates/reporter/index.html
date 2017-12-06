@@ -1,0 +1,197 @@
+{% extends "reporter/base.html"%}
+{%load static%}
+{% load leaflet_tags %}
+{%block leaflet%}{% leaflet_js%}
+{%leaflet_css%}
+{% endblock %}
+
+{%block body %}
+
+
+{%if user.is_anonymous %}
+    <script>
+        $(document).ready(function(){
+        $("#body_content").hide();
+        });
+
+    </script>
+    <br>
+    <br>
+<p align="center"> <button type="button" class="btn btn-warning btn-lg" data-toggle="modal" data-target="#div_report_in">Device Not Configured</button></p>
+<div id="div_report_in" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times</button>
+                <h4 align="center"> <label class="label label-success">Check In</label></h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal" method="post" action="">
+                    {% csrf_token %}
+
+                    <div class="form-group">
+                        &nbsp;&nbsp;<label class="label label-info control-label col-sm-2" for="job_id">Job ID</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="job_id" name="job_id">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        &nbsp;&nbsp;<label class="label label-info control-label col-sm-2" for="guard_password">Password</label>
+                        <div class="col-sm-10">
+                            <input type="password" class="form-control" id="guard_password" name="guard_password">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <button type="submit" class="btn btn-success">Checkin</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{%endif%}
+
+
+<div id="body_content">
+<div id="div_logo">
+ {% for icon in icons %}
+        {%block title%}<title>KKSecurity</title><link rel="icon" href="/media/image/2017/11/27/%09/kk_7ZU2tp1.png" type="image/png">{% endblock %}
+
+{% endfor %}
+
+
+
+</div>
+<script type="text/javascript">
+
+
+    function map_init_basic (map,options,x)
+    {
+
+     if(navigator.geolocation)
+     {
+
+          navigator.geolocation.getCurrentPosition(function(position)
+          {
+            pos = {
+                lat:position.coords.latitude,
+                long:position.coords.longitude
+            };
+            if(pos){
+            var x = position.coords.latitude;
+            var y = position.coords.longitude;
+
+            L.marker([x, y]).addTo(map);
+
+         }
+
+          });
+
+     }
+    }
+</script>
+
+{% leaflet_map "map" callback="window.map_init_basic" %}
+
+
+<script>
+    $(document).ready(function(){
+
+        if(navigator.geolocation)
+     {
+
+          navigator.geolocation.getCurrentPosition(function(position)
+          {
+            pos = {
+                lat:position.coords.latitude,
+                long:position.coords.longitude
+            };
+            if(pos){
+            var x = position.coords.latitude;
+            var y = position.coords.longitude;
+
+            //alert([x, y]);
+
+            $("#longitude").val(y);
+            $("#latitude").val(x);
+
+            var date = new Date().toString();
+            $("#btn_check_in").click(function(){
+                $.post("{% url 'reporter:checkin' %}",
+                {
+                    csrfmiddlewaretoken:'{{csrf_token}}',
+                    user_id:'{{user.id}}',
+                    user_longitude:y,
+                    user_latitude:x
+                },
+                function(data,success)
+                {
+                    alert(data);
+                    alert(success);
+                });
+
+            });
+
+            $("#btn_check_out").click(function()
+            {
+                $.post("{% url 'reporter:checkout' %}",
+                {
+                    csrfmiddlewaretoken:'{{csrf_token}}',
+                    user_id:'{{user.id}}',
+                    user_longitude:y,
+                    latitude:x
+
+
+                },
+                function(data,success)
+                {
+                    alert(data);
+                    alert(success);
+                });
+
+
+
+
+            });
+         }
+
+          });
+
+     }
+
+    });
+</script>
+        <br>
+       <div align="center">
+        {%if user.is_authenticated %}
+
+                    <button type="button" id="btn_check_in" class="btn btn-success btn-lg"><span class="glyphicon glyphicon-hand-right">Check In</span></button>
+                    <br>
+                    <br>
+                    <button type="button"  id="btn_check_out" class="btn btn-warning btn-lg"><span class="glyphicon glyphicon-hand-left">Check Out</span> </button>
+
+                    <script>
+                        $(document).ready(function(){
+                            var x = new Date().toString();
+                            alert(x);
+
+                        });
+                    </script>
+                    <!form action="{% url 'reporter:checkout' %}" method="post">
+                        {%csrf_token%}
+                        <!input type="hidden" name="user_id" value="{{user.id}}">
+                        <!input type="hidden" name="user_longitude" value="123">
+                        <!input type="hidden" name="latitude" value="234">
+
+                        <!button type="submit"><!/button>
+                    </form>
+        {% endif %}
+       </div>
+
+</div>
+{%endblock%}
