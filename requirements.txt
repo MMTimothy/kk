@@ -45,7 +45,7 @@ icalendar==3.8
 idna==2.5
 iso8601==0.1.11
 itsdangerous==0.24
-Jinja2==2.9.6
+Jinja2==2.11.3
 jsbeautifier==1.6.4
 kaitaistruct==0.7
 kazam==1.4.5
